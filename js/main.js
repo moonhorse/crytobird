@@ -76,7 +76,7 @@ var callbackUrl = NebPay.config.testnetUrl;
 
 
 function postResult(score){
-  var to =  'n1fhAciLurcCh7j9N62V39dUh4idAqUammG';  //'n1hQAZoxTYGyaRrQJbRUUzuwe8iwG8FauLU'  //
+  var to =  'n21AKbpEXbApyGDcz1dVeaFmnxjXfzStFkY';  //'n1hQAZoxTYGyaRrQJbRUUzuwe8iwG8FauLU'  //
   var value = '0';
   var callFunction = 'submitScore';
   var callArgs = JSON.stringify([score,id] );
