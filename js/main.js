@@ -15,7 +15,7 @@
    limitations under the License.
 */
 
-var debugmode = false;
+var debugmode = true;
 
 var states = Object.freeze({
    SplashScreen: 0,
@@ -35,7 +35,7 @@ var flyArea = $("#flyarea").height();
 var score = 0;
 var highscore = 0;
 
-var pipeheight = 90;
+var pipeheight = 190;
 var pipewidth = 52;
 var pipes = new Array();
 
@@ -172,9 +172,6 @@ function showSplash()
 
 function startGame()
 {
-
-  postResult(100)
-  return
    currentstate = states.GameScreen;
    
    //fade out the splash
@@ -440,6 +437,7 @@ function playerDead()
 
 function showScore()
 {
+  postResult(score)
    //unhide us
    $("#scoreboard").css("display", "block");
    
