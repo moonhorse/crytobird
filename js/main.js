@@ -97,6 +97,7 @@ function postResult(score){
               if((resp.code === 0 && resp.data.status === 1)){
                 clearInterval(time_id)
                 console.log('resp.data.execute_result',resp.data.execute_result)
+                alert("Your score has been posted.");
               }
             })
             .catch(function (err) {
