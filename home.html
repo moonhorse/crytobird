@@ -33,7 +33,7 @@
 
       function onPlayClickListener(resp) {
         if (!!resp.indexOf && resp.indexOf("Transaction rejected") >= 0) {
-          alert("Transaction is rejected. You cannot enter the game.");
+          alert("Transaction is rejected. You cannot start the game.");
         } else {
           setLoading(true);
           time_id = setInterval(() => {
