@@ -10,6 +10,7 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
     <script type="text/javascript">
+      var CONTRACT_ADDR = "n1eNs6JoGNKU4gcXFDYvQjY3yLJM5U8vdm4";
       var NebPay = require("nebpay");
       var nebPay = new NebPay();
       var serialNumber;
@@ -17,7 +18,7 @@
       var time_id;
 
       function onPlayClick() {
-        var to = 'n1wwj1tCFNPuUeEXvZogp3A4Da7BSc6HNiD';
+        var to = CONTRACT_ADDR;
         var value = '0.001';
         var callFunction = 'startToPlay';
         var callArgs = '[]';
@@ -81,6 +82,9 @@
     <div class="text-center">
         <button  class="btn btn-primary btn-large"  type="button" onClick="onPlayClick();">Start Game</button>
     </div>
+    <div>
+	Current Balance: <span id="playerBalance"></span>
+    </div>
 </div>
 
 <div style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: black; opacity: 0.8; display: none;" id="cover">
@@ -90,4 +94,49 @@
 </div>
 
 </body>
+<script>
+     
+      function updatePlayerInfo() {
+        var to = CONTRACT_ADDR;
+        var value = '0.001';
+        var callFunction = 'getPlayer';
+        var callArgs = '[]';
+        serialNumber = nebPay.call(to, value, callFunction, callArgs, {
+          callback:callbackUrl,
+          listener: playerInfoCb
+        });
+        console.log(serialNumber)
+        time_id = setInterval(() => {
+          pollPlayerInfo();
+        }, 2000);
+      }
+
+      function playerInfoCb(resp) {
+	console.log('on player info cb')
+	console.log(resp)
+      }
+
+
+      function pollPlayerInfo() {
+        console.log('on player info')
+        nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
+          .then(function (resp) {
+            resp = JSON.parse(resp)
+            if((resp.code === 0 && resp.data.status === 1)){
+	      console.log('on player info poll')
+	      console.log(resp)
+              clearInterval(time_id)
+              var playerInfo = JSON.parse( resp.data.execute_result )
+              $('#playerBalance').text = playerInfo.balance
+              window.location.href = 'floppybird.html?id='+gameid
+            }
+          })
+          .catch(function (err) {
+            console.log(err);
+          });
+      }
+
+      // Initialize the page
+      updatePlayerInfo();
+</script>
 </html>
