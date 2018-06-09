@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/home.css" rel="stylesheet">
 
     <script type="text/javascript" src="js/nebPay.js"></script>
     <script type="text/javascript" src="js/nebulas.js"></script>
@@ -137,8 +138,17 @@
 
 
       function leaderboardCb(resp) {
-	console.log('leader board')
-        $('#leaderBoardContent').text(resp.result)
+        var result = JSON.parse(resp.result);
+        result.sort(function(a, b) {
+          return b.score - a.score;
+        });
+        result.forEach(function(item) {
+          $('#leaderBoardContent').append(
+            $("<div>")
+              .append($("<span class='score'>").text(item.score))
+              .append($("<span class='address'>").text(item.id))
+          );
+        });
       }
 
 
