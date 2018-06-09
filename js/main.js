@@ -15,7 +15,7 @@
    limitations under the License.
 */
 
-var debugmode = true;
+var debugmode = false;
 
 var states = Object.freeze({
    SplashScreen: 0,
@@ -35,7 +35,7 @@ var flyArea = $("#flyarea").height();
 var score = 0;
 var highscore = 0;
 
-var pipeheight = 190;
+var pipeheight = 120;
 var pipewidth = 52;
 var pipes = new Array();
 
@@ -100,7 +100,7 @@ function postResult(score){
       .catch(function (err) {
         console.log(err);
       });
-  }, 2000);
+  }, 5000);
 }
 
 $(document).ready(function() {
