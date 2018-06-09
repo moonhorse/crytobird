@@ -7,16 +7,18 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <script type="text/javascript" src="js/nebPay.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="js/nebulas.js"></script>
+    <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
 
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="text/javascript">
-      var CONTRACT_ADDR = "n1eNs6JoGNKU4gcXFDYvQjY3yLJM5U8vdm4";
+      var CONTRACT_ADDR = "n21AKbpEXbApyGDcz1dVeaFmnxjXfzStFkY";
       var NebPay = require("nebpay");
       var nebPay = new NebPay();
-      var serialNumber;
       var callbackUrl = NebPay.config.testnetUrl;
       var time_id;
 
+      var serialNumber;
       function onPlayClick() {
         var to = CONTRACT_ADDR;
         var value = '0.001';
@@ -26,20 +28,17 @@
           callback:callbackUrl,
           listener: onPlayClickListener
         });
-        console.log(serialNumber)
         time_id = setInterval(() => {
           poll();
         }, 2000);
       }
 
       function onPlayClickListener(resp) {
-	   console.log("on call click ");
 	   setLoading(true);
       }
 
 
       function poll() {
-        console.log('onrefreshClick')
         nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
           .then(function (resp) {
             resp = JSON.parse(resp)
@@ -85,6 +84,11 @@
     <div>
 	Current Balance: <span id="playerBalance"></span>
     </div>
+    <div>
+	Leaderboard
+    </div>
+    <div id="leaderBoardContent">
+    </div>
 </div>
 
 <div style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: black; opacity: 0.8; display: none;" id="cover">
@@ -95,48 +99,47 @@
 
 </body>
 <script>
-     
+    
+      var serialNumberPlayerInfo;
+
       function updatePlayerInfo() {
         var to = CONTRACT_ADDR;
-        var value = '0.001';
-        var callFunction = 'getPlayer';
+        var value = '0';
+        var callFunction = 'getBalance';
         var callArgs = '[]';
-        serialNumber = nebPay.call(to, value, callFunction, callArgs, {
+        serialNumberPlayerInfo = nebPay.simulateCall(to, value, callFunction, callArgs, {
           callback:callbackUrl,
           listener: playerInfoCb
         });
-        console.log(serialNumber)
-        time_id = setInterval(() => {
-          pollPlayerInfo();
-        }, 2000);
       }
+
 
       function playerInfoCb(resp) {
-	console.log('on player info cb')
-	console.log(resp)
+        $('#playerBalance').text(resp.result)
+      }
+
+      var serialNumberLeaderboard;
+
+      function updateLeaderboard() {
+        var to = CONTRACT_ADDR;
+        var value = '0';
+        var callFunction = 'getLeaderBoard';
+        var callArgs = '[]';
+        serialNumberPlayerInfo = nebPay.simulateCall(to, value, callFunction, callArgs, {
+          callback:callbackUrl,
+          listener: leaderboardCb
+        });
       }
 
 
-      function pollPlayerInfo() {
-        console.log('on player info')
-        nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
-          .then(function (resp) {
-            resp = JSON.parse(resp)
-            if((resp.code === 0 && resp.data.status === 1)){
-	      console.log('on player info poll')
-	      console.log(resp)
-              clearInterval(time_id)
-              var playerInfo = JSON.parse( resp.data.execute_result )
-              $('#playerBalance').text = playerInfo.balance
-              window.location.href = 'floppybird.html?id='+gameid
-            }
-          })
-          .catch(function (err) {
-            console.log(err);
-          });
+      function leaderboardCb(resp) {
+	console.log('leader board')
+        $('#leaderBoardContent').text(resp.result)
       }
+
 
       // Initialize the page
       updatePlayerInfo();
+      updateLeaderboard();
 </script>
 </html>
