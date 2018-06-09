@@ -28,13 +28,17 @@
           callback:callbackUrl,
           listener: onPlayClickListener
         });
-        time_id = setInterval(() => {
-          poll();
-        }, 5000);
       }
 
       function onPlayClickListener(resp) {
-	   setLoading(true);
+        if (resp.indexOf("Transaction rejected") >= 0) {
+          alert("Transaction is rejected. You cannot enter the game.");
+        } else {
+          setLoading(true);
+          time_id = setInterval(() => {
+            poll();
+          }, 5000);
+        }
       }
 
 
@@ -44,8 +48,8 @@
             resp = JSON.parse(resp)
             if((resp.code === 0 && resp.data.status === 1)){
 
-	      setLoading(false);
-		 
+              setLoading(false);
+
               clearInterval(time_id)
               var gameid = JSON.parse( resp.data.execute_result )
               window.location.href = 'floppybird.html?id='+gameid+'&r='+10000*Math.random()
@@ -99,7 +103,7 @@
 
 </body>
 <script>
-    
+
       var serialNumberPlayerInfo;
 
       function updatePlayerInfo() {
