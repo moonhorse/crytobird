@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+
     <script type="text/javascript" src="js/nebPay.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
     <script type="text/javascript">
       var NebPay = require("nebpay");
       var nebPay = new NebPay();
@@ -13,51 +16,40 @@
       var callbackUrl = NebPay.config.testnetUrl;
       var time_id;
 
-      function listener(resp) {
-        console.log("listener: " + JSON.stringify(resp))
-        document.getElementById('result').value = JSON.stringify(resp)
-      }
 
       //n1z9LrTVfckAsz9G5BRdnmHYPjmZzhR9nnz
 
-      function onCallClick2() {
-        var to = 'n1z9LrTVfckAsz9G5BRdnmHYPjmZzhR9nnz';
-        var value = '0';
-        var callFunction = 'balanceOf';
-        var callArgs = '[]';
-        serialNumber = nebPay.call(to, value, callFunction, callArgs, {
-          callback:callbackUrl,
-          listener: listener
-        });
-        console.log(serialNumber)
-        time_id = setInterval(() => {
-          onrefreshClick();
-        }, 2000);
-      }
 
-
-      function onCallClick() {
+      function onPlayClick() {
         var to = 'n1wwj1tCFNPuUeEXvZogp3A4Da7BSc6HNiD';
         var value = '0.001';
         var callFunction = 'startToPlay';
         var callArgs = '[]';
         serialNumber = nebPay.call(to, value, callFunction, callArgs, {
           callback:callbackUrl,
-          listener: listener
+          listener: onPlayClickListener
         });
         console.log(serialNumber)
         time_id = setInterval(() => {
-          onrefreshClick();
+          poll();
         }, 2000);
       }
 
+      function onPlayClickListener(resp) {
+	   console.log("on call click ");
+	   setLoading(true);
+      }
 
-      function onrefreshClick() {
+
+      function poll() {
         console.log('onrefreshClick')
         nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
           .then(function (resp) {
             resp = JSON.parse(resp)
             if((resp.code === 0 && resp.data.status === 1)){
+
+	      setLoading(false);
+		 
               clearInterval(time_id)
               var gameid = JSON.parse( resp.data.execute_result )
               window.location.href = 'floppybird.html?id='+gameid
@@ -66,6 +58,15 @@
           .catch(function (err) {
             console.log(err);
           });
+      }
+
+      // Set the screen to loading status
+      function setLoading(state) {
+	   if (state) {
+		$('#cover').show()
+	   } else {
+		$('#cover').hide()
+	   }
       }
 
 
@@ -82,9 +83,15 @@
     </div>
     <div class="text-center">This is CryptoBird Home</div>
     <div class="text-center">
-        <button  class="btn btn-primary btn-large"  type="button" onClick="onCallClick();">Start Game</button>
+        <button  class="btn btn-primary btn-large"  type="button" onClick="onPlayClick();">Start Game</button>
     </div>
     <textarea id="result" readonly="readonly"></textarea>
+</div>
+
+<div style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: black; opacity: 0.8; display: none;" id="cover">
+   <div style="position: absolute; top: 100px; left: 100px; font-size: 48px; font-color: white;">
+	      Loading ...
+   </div>
 </div>
 
 </body>
