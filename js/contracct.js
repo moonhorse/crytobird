@@ -89,6 +89,7 @@ var Cryptobird = function () {
 Cryptobird.prototype = {
   init: function () {
     this.gameConfig.put("blindBid", "1000000000000000"); // 0.001 NAS;
+    this.gameConfig.put("sessionLength", 60); // in sec;
   },
   // start To Play
   startToPlay: function () {
@@ -113,9 +114,44 @@ Cryptobird.prototype = {
     this.games.put(gameId, myGame);
     return gameId;
   },
+  // payout NAS
+  payOut: function () {
+    var from = Blockchain.transaction.from;
+    var myPlayer = this.players.get(from);
+    if (!myPlayer) {
+      throw new Error("player not exist!" );
+    }
+    var ammount = myPlayer.balance;
+    myPlayer.balance = 0;
+    this.player.put(from, myPlayer);
+    // transfer NAS from contract to player
+    Blockchain.transfer(from, myPlayer.balance);
+  },
+
+  // get session _leaderBoard
+  _calSession: function(sessionId) {
+    var session = this.sessions.get(sessionId);
+    if ((new BigNumber(mySession.pool)).eq(0)) {
+      return;
+    }
+    var _scores = session.scores;
+    var winnerId = '';
+    var highScore = 0;
+    Object.keys(_scores).map(function(playerId) {
+      if ((new BigNumber(scores[playerId])).lg(highScore)) {
+        highScore = scores[playerId];
+        winnerId = playerId;
+      };
+    });
+    var winner = this.players.get(winnerId);
+    winner.balance = (new BigNumber(winner.balance)).plus(session.pool);
+    this.players.put(winnerId, winner);
+    session.pool = new BigNumber(0);
+    this.sessions.put(sessionId, session);
+  },
 
   // submit score
-  submitScore: function (score, gameId) {
+  submitScore: function(score, gameId) {
 
     // if player not signed, signup.
     var from = Blockchain.transaction.from;
@@ -136,13 +172,18 @@ Cryptobird.prototype = {
 
     // get session
     var date = new Date();
-    var sessionId = parseInt(date / (3600 * 1000));
+    var sessionId = parseInt(date / (600 * 1000));
     var mySession = this.sessions.get(sessionId);
     if (!mySession) {
       mySession = new CBSession();
+      var lastSession = this.gameConfig.get("currentSession");
+      if (lastSession) {
+        this._calSession(lastSession);
+      }
+      this.gameConfig.put("currentSession", sessionId);
     }
 
-    mySession.pool =  (new BigNumber(mySession.pool)).plus(myGame.balance);
+    mySession.pool = (new BigNumber(mySession.pool)).plus(myGame.balance);
     var myScore = mySession.scores[from];
     if (!myScore || myScore < score) {
       mySession.scores[from] = score;
@@ -152,9 +193,9 @@ Cryptobird.prototype = {
   },
 
   // get current pool
-  getPool: function () {
+  getPool: function() {
     var date = new Date();
-    var sessionId = parseInt(date / (3600 * 1000));
+    var sessionId = parseInt(date / (600 * 1000));
     var mySession = this.sessions.get(sessionId);
     if (!mySession) {
       return 0;
@@ -172,9 +213,9 @@ Cryptobird.prototype = {
   },
 
   // get leader board of current session
-  getLeaderBoard: function () {
+  getLeaderBoard: function() {
     var date = new Date();
-    var sessionId = parseInt(date / (3600 * 1000));
+    var sessionId = parseInt(date / (600 * 1000));
     var mySession = this.sessions.get(sessionId);
     if (!mySession) {
       return null;
