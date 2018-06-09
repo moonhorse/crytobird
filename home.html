@@ -16,10 +16,6 @@
       var callbackUrl = NebPay.config.testnetUrl;
       var time_id;
 
-
-      //n1z9LrTVfckAsz9G5BRdnmHYPjmZzhR9nnz
-
-
       function onPlayClick() {
         var to = 'n1wwj1tCFNPuUeEXvZogp3A4Da7BSc6HNiD';
         var value = '0.001';
@@ -52,7 +48,7 @@
 		 
               clearInterval(time_id)
               var gameid = JSON.parse( resp.data.execute_result )
-              window.location.href = 'floppybird.html?id='+gameid
+              window.location.href = 'floppybird.html?id='+gameid+'&r='+10000*Math.random()
             }
           })
           .catch(function (err) {
@@ -85,7 +81,6 @@
     <div class="text-center">
         <button  class="btn btn-primary btn-large"  type="button" onClick="onPlayClick();">Start Game</button>
     </div>
-    <textarea id="result" readonly="readonly"></textarea>
 </div>
 
 <div style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: black; opacity: 0.8; display: none;" id="cover">
