@@ -54,6 +54,54 @@ buzz.all().setVolume(volume);
 var loopGameloop;
 var loopPipeloop;
 
+
+function getUrlVars() {
+  var vars = [],
+    hash;
+  var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+  for (var i = 0; i < hashes.length; i++) {
+    hash = hashes[i].split('=');
+    vars.push(hash[0]);
+    vars[hash[0]] = hash[1];
+  }
+  return vars;
+}
+
+var id = getUrlVars()["id"];
+
+var NebPay = require("nebpay");
+var nebPay = new NebPay();
+var serialNumber;
+var callbackUrl = NebPay.config.testnetUrl;
+
+
+function postResult(score){
+  var to = 'n1hQAZoxTYGyaRrQJbRUUzuwe8iwG8FauLU';
+  var value = '0';
+  var callFunction = 'save';
+  var callArgs = JSON.stringify([score,id] );
+  console.log('callArgs',callArgs)
+  serialNumber = nebPay.call(to, value, callFunction, callArgs, {
+    callback:callbackUrl,
+    listener: (resp)=>{
+      console.log("listener=>" + JSON.stringify(resp))
+    }
+  });
+  var time_id = setInterval(() => {
+    nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
+      .then(function (resp) {
+        resp = JSON.parse(resp)
+        if((resp.code === 0 && resp.data.status === 1)){
+          clearInterval(time_id)
+          console.log('resp.data.execute_result',resp.data.execute_result)
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
+  }, 2000);
+}
+
 $(document).ready(function() {
    if(window.location.search == "?debug")
       debugmode = true;
@@ -64,9 +112,13 @@ $(document).ready(function() {
    var savedscore = getCookie("highscore");
    if(savedscore != "")
       highscore = parseInt(savedscore);
-   
+
+
    //start with the splash screen
    showSplash();
+
+   console.log('id='+id)
+
 });
 
 function getCookie(cname)
@@ -120,6 +172,9 @@ function showSplash()
 
 function startGame()
 {
+
+  postResult(100)
+  return
    currentstate = states.GameScreen;
    
    //fade out the splash
