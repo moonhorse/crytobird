@@ -86,7 +86,7 @@ function postResult(score){
     listener: (resp)=>{
       console.log("listener=>" + JSON.stringify(resp))
 
-      if (resp.indexOf("Transaction rejected") >= 0) {
+      if (!!resp.indexOf && resp.indexOf("Transaction rejected") >= 0) {
         alert("Transaction is rejected. Your score is not posted.");
       } else {
         var time_id = setInterval(() => {

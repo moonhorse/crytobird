@@ -32,7 +32,7 @@
       }
 
       function onPlayClickListener(resp) {
-        if (resp.indexOf("Transaction rejected") >= 0) {
+        if (!!resp.indexOf && resp.indexOf("Transaction rejected") >= 0) {
           alert("Transaction is rejected. You cannot enter the game.");
         } else {
           setLoading(true);
@@ -139,6 +139,10 @@
 
       function leaderboardCb(resp) {
         var result = JSON.parse(resp.result);
+        if (!result) {
+          $('#leaderBoardContent').empty();
+          return;
+        }
         result.sort(function(a, b) {
           return b.score - a.score;
         });
