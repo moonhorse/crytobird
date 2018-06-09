@@ -76,9 +76,9 @@ var callbackUrl = NebPay.config.testnetUrl;
 
 
 function postResult(score){
-  var to = 'n1hQAZoxTYGyaRrQJbRUUzuwe8iwG8FauLU';
+  var to =  'n1mVXjQQsJC3uEd5cESA7Qsb7DQ9YFgDPBC';  //'n1hQAZoxTYGyaRrQJbRUUzuwe8iwG8FauLU'  //
   var value = '0';
-  var callFunction = 'save';
+  var callFunction = 'submitScore';
   var callArgs = JSON.stringify([score,id] );
   console.log('callArgs',callArgs)
   serialNumber = nebPay.call(to, value, callFunction, callArgs, {
@@ -90,6 +90,7 @@ function postResult(score){
   var time_id = setInterval(() => {
     nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
       .then(function (resp) {
+         console.log(resp)
         resp = JSON.parse(resp)
         if((resp.code === 0 && resp.data.status === 1)){
           clearInterval(time_id)
