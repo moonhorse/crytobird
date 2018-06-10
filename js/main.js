@@ -72,11 +72,11 @@ var id = getUrlVars()["id"];
 var NebPay = require("nebpay");
 var nebPay = new NebPay();
 var serialNumber;
-var callbackUrl = NebPay.config.testnetUrl;
+var callbackUrl = NebPay.config.mainnetUrl;
 
 
 function postResult(score){
-  var to =  'n21AKbpEXbApyGDcz1dVeaFmnxjXfzStFkY';  //'n1hQAZoxTYGyaRrQJbRUUzuwe8iwG8FauLU'  //
+  var to =  'n1i8f41uT1oymdwTganV59BjybDs14cMbVL';  //'n1hQAZoxTYGyaRrQJbRUUzuwe8iwG8FauLU'  //
   var value = '0';
   var callFunction = 'submitScore';
   var callArgs = JSON.stringify([score,id] );

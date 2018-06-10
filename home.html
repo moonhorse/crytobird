@@ -13,27 +13,28 @@
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="text/javascript">
-      var CONTRACT_ADDR = "n21AKbpEXbApyGDcz1dVeaFmnxjXfzStFkY";
+      var CONTRACT_ADDR = "n1i8f41uT1oymdwTganV59BjybDs14cMbVL";
       var NebPay = require("nebpay");
       var nebPay = new NebPay();
-      var callbackUrl = NebPay.config.testnetUrl;
+      var callbackUrl = NebPay.config.mainnetUrl;
       var time_id;
 
       var serialNumber;
+
       function onPlayClick() {
         var to = CONTRACT_ADDR;
         var value = '0.001';
         var callFunction = 'startToPlay';
         var callArgs = '[]';
         serialNumber = nebPay.call(to, value, callFunction, callArgs, {
-          callback:callbackUrl,
+          callback: callbackUrl,
           listener: onPlayClickListener
         });
       }
 
       function onPlayClickListener(resp) {
         console.log(typeof resp)
-        if (typeof(resp)==='string' && resp.indexOf("Transaction rejected") >= 0) {
+        if (typeof(resp) === 'string' && resp.indexOf("Transaction rejected") >= 0) {
           alert("Transaction is rejected. You cannot enter the game.");
         } else {
           setLoading(true);
@@ -45,16 +46,16 @@
 
 
       function poll() {
-        nebPay.queryPayInfo(serialNumber,{callback: callbackUrl})   //search transaction result from server (result upload to server by app)
+        nebPay.queryPayInfo(serialNumber, {callback: callbackUrl})   //search transaction result from server (result upload to server by app)
           .then(function (resp) {
             resp = JSON.parse(resp)
-            if((resp.code === 0 && resp.data.status === 1)){
+            if ((resp.code === 0 && resp.data.status === 1)) {
 
               setLoading(false);
 
               clearInterval(time_id)
-              var gameid = JSON.parse( resp.data.execute_result )
-              window.location.href = 'floppybird.html?id='+gameid+'&r='+10000*Math.random()
+              var gameid = JSON.parse(resp.data.execute_result)
+              window.location.href = 'floppybird.html?id=' + gameid + '&r=' + 10000 * Math.random()
             }
           })
           .catch(function (err) {
@@ -64,28 +65,29 @@
 
       // Set the screen to loading status
       function setLoading(state) {
-	   if (state) {
-		$('#cover').show()
-	   } else {
-		$('#cover').hide()
-	   }
+        if (state) {
+          $('#cover').show()
+        } else {
+          $('#cover').hide()
+        }
       }
 
 
     </script>
 </head>
 <body>
-    <div class="page-header">
-  <h1>CryptoBird</h1>
-</div>
+
 
 <div class="container">
+    <div class="page-header">
+        <h1>CryptoBird</h1>
+    </div>
     <div class="text-center">
         <img src="assets/splash.png" width="160" class="img-polaroid">
     </div>
     <div class="alert alert-success">This is CryptoBird Home</div>
     <div class="text-center">
-        <button  class="btn btn-primary btn-large"  type="button" onClick="onPlayClick();">Start Game</button>
+        <button class="btn btn-primary btn-large" type="button" onClick="onPlayClick();">Start Game</button>
     </div>
     <div>
         <div>
@@ -102,75 +104,77 @@
     </div>
 </div>
 
-<div style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: black; opacity: 0.8; display: none;" id="cover">
-   <div style="position: absolute; top: 100px; left: 100px; font-size: 48px; font-color: white;">
-	      Loading ...
-   </div>
+<div style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background-color: black; opacity: 0.8; display: none;"
+     id="cover">
+    <div style="position: absolute; top: 100px; left: 100px; font-size: 48px; font-color: white;">
+        Loading ...
+    </div>
 </div>
 
 </body>
 <script>
 
-      var serialNumberPlayerInfo;
+  var serialNumberPlayerInfo;
 
-      function updatePlayerInfo() {
-        var to = CONTRACT_ADDR;
-        var value = '0';
-        var callFunction = 'getBalance';
-        var callArgs = '[]';
-        serialNumberPlayerInfo = nebPay.simulateCall(to, value, callFunction, callArgs, {
-          callback:callbackUrl,
-          listener: playerInfoCb
-        });
+  function updatePlayerInfo() {
+    var to = CONTRACT_ADDR;
+    var value = '0';
+    var callFunction = 'getBalance';
+    var callArgs = '[]';
+    serialNumberPlayerInfo = nebPay.simulateCall(to, value, callFunction, callArgs, {
+      callback: callbackUrl,
+      listener: playerInfoCb
+    });
+  }
+
+
+  function playerInfoCb(resp) {
+    if (resp && resp.result)
+      $('#playerBalance').text(JSON.parse(resp.result))
+  }
+
+  var serialNumberLeaderboard;
+
+  function updateLeaderboard() {
+    var to = CONTRACT_ADDR;
+    var value = '0';
+    var callFunction = 'getLeaderBoard';
+    var callArgs = '[]';
+    serialNumberPlayerInfo = nebPay.simulateCall(to, value, callFunction, callArgs, {
+      callback: callbackUrl,
+      listener: leaderboardCb
+    });
+
+
+    var serialNumberPool = nebPay.simulateCall(to, value, 'getPool', '[]', {
+      callback: callbackUrl,
+      listener: (resp) => {
+        console.log('getPool', resp)
+
+        var pool = JSON.parse(resp.result);
+        $('#pool').text(Number(pool) * 1.0 / Math.pow(10, 18))
       }
+    });
+  }
 
 
-      function playerInfoCb(resp) {
-        $('#playerBalance').text( JSON.parse( resp.result ) )
-      }
-
-      var serialNumberLeaderboard;
-
-      function updateLeaderboard() {
-        var to = CONTRACT_ADDR;
-        var value = '0';
-        var callFunction = 'getLeaderBoard';
-        var callArgs = '[]';
-        serialNumberPlayerInfo = nebPay.simulateCall(to, value, callFunction, callArgs, {
-          callback:callbackUrl,
-          listener: leaderboardCb
-        });
+  function leaderboardCb(resp) {
+    var result = JSON.parse(resp.result);
+    result.sort(function (a, b) {
+      return b.score - a.score;
+    });
+    result.forEach(function (item) {
+      $('#leaderBoardContent').append(
+        $("<div>")
+          .append($("<span class='score'>").text(item.score))
+          .append($("<span class='address'>").text(item.id))
+      );
+    });
+  }
 
 
-        var  serialNumberPool = nebPay.simulateCall(to, value, 'getPool', '[]', {
-          callback:callbackUrl,
-          listener: (resp)=>{
-            console.log('getPool',resp)
-
-            var pool = JSON.parse(resp.result);
-            $('#pool').text(Number(pool)*1.0/Math.pow(10,18))
-          }
-        });
-      }
-
-
-      function leaderboardCb(resp) {
-        var result = JSON.parse(resp.result);
-        result.sort(function(a, b) {
-          return b.score - a.score;
-        });
-        result.forEach(function(item) {
-          $('#leaderBoardContent').append(
-            $("<div>")
-              .append($("<span class='score'>").text(item.score))
-              .append($("<span class='address'>").text(item.id))
-          );
-        });
-      }
-
-
-      // Initialize the page
-      updatePlayerInfo();
-      updateLeaderboard();
+  // Initialize the page
+  updatePlayerInfo();
+  updateLeaderboard();
 </script>
 </html>
