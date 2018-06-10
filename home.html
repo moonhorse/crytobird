@@ -32,7 +32,8 @@
       }
 
       function onPlayClickListener(resp) {
-        if (resp.indexOf("Transaction rejected") >= 0) {
+        console.log(typeof resp)
+        if (typeof(resp)==='string' && resp.indexOf("Transaction rejected") >= 0) {
           alert("Transaction is rejected. You cannot enter the game.");
         } else {
           setLoading(true);
