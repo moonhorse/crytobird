@@ -81,19 +81,24 @@
 
 <div class="container">
     <div class="text-center">
-        <img src="assets/splash.png" class="img-polaroid">
+        <img src="assets/splash.png" width="160" class="img-polaroid">
     </div>
-    <div class="text-center">This is CryptoBird Home</div>
+    <div class="alert alert-success">This is CryptoBird Home</div>
     <div class="text-center">
         <button  class="btn btn-primary btn-large"  type="button" onClick="onPlayClick();">Start Game</button>
     </div>
     <div>
-	Current Balance: <span id="playerBalance"></span>
-    </div>
-    <div>
-	Leaderboard
-    </div>
-    <div id="leaderBoardContent">
+        <div>
+            <h4>Current Pool: </h4><span id="pool"></span>
+        </div>
+        <div>
+            <h4>Current Balance: </h4><span id="playerBalance"></span>
+        </div>
+        <div>
+            <h4>Leaderboard</h4>
+        </div>
+        <div id="leaderBoardContent">
+        </div>
     </div>
 </div>
 
@@ -121,7 +126,7 @@
 
 
       function playerInfoCb(resp) {
-        $('#playerBalance').text(resp.result)
+        $('#playerBalance').text( JSON.parse( resp.result ) )
       }
 
       var serialNumberLeaderboard;
@@ -134,6 +139,17 @@
         serialNumberPlayerInfo = nebPay.simulateCall(to, value, callFunction, callArgs, {
           callback:callbackUrl,
           listener: leaderboardCb
+        });
+
+
+        var  serialNumberPool = nebPay.simulateCall(to, value, 'getPool', '[]', {
+          callback:callbackUrl,
+          listener: (resp)=>{
+            console.log('getPool',resp)
+
+            var pool = JSON.parse(resp.result);
+            $('#pool').text(Number(pool)*1.0/Math.pow(10,18))
+          }
         });
       }
 
